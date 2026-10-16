@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Nexa Beta">
+  <title>Nexa (Beta)</title>
+  <style>
+    :root {
+      --ink: #171923;
+      --muted: #777b88;
+      --line: #e8eaf0;
+      --accent: #6558f5;
+      --accent-dark: #5145df;
+      --soft: #f6f7fb;
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--ink);
+      background: linear-gradient(180deg, #fff 0%, #f8f9ff 100%);
+      font-family: Tahoma, Arial, sans-serif;
+    }
+    button, a { font: inherit; }
+    button { cursor: pointer; }
+    .screen { min-height: 100vh; display: none; padding: 24px; }
+    .screen.active { display: flex; }
+    .landing { align-items: center; justify-content: center; }
+    .welcome-card {
+      width: min(100%, 430px); padding: 38px 26px; text-align: center;
+      background: rgba(255,255,255,.92); border: 1px solid var(--line);
+      border-radius: 30px; box-shadow: 0 24px 70px rgba(35, 38, 70, .08);
+    }
+    .logo {
+      width: 76px; height: 76px; margin: 0 auto 22px; border-radius: 25px;
+      display: grid; place-items: center; color: #fff; font-size: 32px; font-weight: 800;
+      background: linear-gradient(135deg, #8478ff, #5145df);
+      box-shadow: 0 12px 28px rgba(101,88,245,.25);
+      direction: ltr;
+    }
+    h1 { font-size: clamp(25px, 6vw, 34px); margin: 0 0 10px; direction: ltr; }
+    .sub { color: var(--muted); line-height: 1.9; margin: 0 0 28px; }
+    .primary {
+      width: 100%; border: 0; border-radius: 15px; padding: 16px 18px;
+      color: white; background: var(--accent); font-weight: 700;
+      transition: transform .15s, background .15s;
+    }
+    .primary:hover { background: var(--accent-dark); }
+    .primary:active { transform: scale(.985); }
+    .beta { display: inline-block; margin-top: 18px; color: #8a85cc; font-size: 12px; letter-spacing: 1.4px; direction: ltr; }
+    .app-screen { padding: 0; flex-direction: column; }
+    .topbar {
+      position: sticky; top: 0; z-index: 5; display: flex; align-items: center;
+      gap: 14px; padding: 15px 18px; background: rgba(255,255,255,.92);
+      border-bottom: 1px solid var(--line); backdrop-filter: blur(12px);
+    }
+    .menu-btn {
+      width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 14px;
+      background: white; display: grid; place-items: center; color: var(--ink);
+      font-size: 22px; flex: 0 0 auto;
+    }
+    .brand { font-weight: 800; font-size: 18px; direction: ltr; }
+    .brand small { display: block; color: var(--muted); font-size: 10px; font-weight: 500; margin-top: 3px; }
+    .content { width: min(100%, 900px); margin: 0 auto; padding: clamp(24px, 6vw, 60px) 22px; flex: 1; }
+    .hero {
+      padding: clamp(28px, 7vw, 58px) clamp(22px, 6vw, 48px);
+      border: 1px solid var(--line); border-radius: 28px; background: white;
+      box-shadow: 0 20px 60px rgba(35,38,70,.055);
+    }
+    .eyebrow { color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 2px; direction: ltr; }
+    .hero h2 { font-size: clamp(28px, 7vw, 46px); margin: 16px 0; direction: ltr; text-align: right; }
+    .hero p { color: var(--muted); line-height: 2; margin: 0; }
+    .section-title { margin: 0 0 20px; font-size: 25px; }
+    .apps-placeholder { padding: 32px 24px; border: 1px dashed #d8d9e7; background: white; border-radius: 24px; text-align: center; }
+    .soon-icon { width: 60px; height: 60px; margin: 0 auto 18px; display: grid; place-items: center; border-radius: 20px; background: #f0efff; color: var(--accent); font-size: 27px; }
+    .apps-placeholder p { color: var(--muted); line-height: 1.9; margin-bottom: 0; }
+    .footer { padding: 20px; text-align: center; color: #9a9daa; font-size: 12px; direction: ltr; }
+    .overlay { position: fixed; inset: 0; background: rgba(18,20,35,.28); z-index: 9; display: none; }
+    .overlay.show { display: block; }
+    .drawer {
+      position: fixed; z-index: 10; top: 0; bottom: 0; left: 0; width: min(82vw, 310px);
+      padding: 24px 18px; background: white; box-shadow: 12px 0 45px rgba(20,20,40,.12);
+      transform: translateX(-105%); transition: transform .22s ease; direction: rtl;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .drawer-head strong { direction: ltr; font-size: 21px; }
+    .close-btn { border: 0; background: var(--soft); border-radius: 12px; width: 38px; height: 38px; font-size: 20px; }
+    .nav-item {
+      display: block; width: 100%; text-align: right; padding: 16px 15px; margin: 8px 0;
+      border: 1px solid transparent; border-radius: 14px; background: white; color: var(--ink);
+    }
+    .nav-item:hover, .nav-item:focus { background: #f6f5ff; border-color: #e6e3ff; outline: none; }
+    .nav-item span { display: block; font-weight: 700; }
+    .nav-item small { display: block; color: var(--muted); margin-top: 6px; line-height: 1.7; }
+    @media (min-width: 700px) {
+      .topbar { padding-inline: max(24px, calc((100vw - 900px) / 2)); }
+    }
+  </style>
+</head>
+<body>
+  <!-- صفحه ورود -->
+  <main id="landing" class="screen landing active">
+    <section class="welcome-card">
+      <div class="logo">N</div>
+      <h1>Nexa <span style="color:var(--accent)">(Beta)</span></h1>
+      <p class="sub">به فضای ساده و جدید نکسا خوش آمدید.</p>
+      <button class="primary" id="guestBtn">ورود به عنوان مهمان (Beta)</button>
+      <span class="beta">EARLY ACCESS · BETA</span>
+    </section>
+  </main>
+
+  <!-- صفحه اصلی پس از ورود مهمان -->
+  <main id="dashboard" class="screen app-screen">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="باز کردن منو" aria-expanded="false">☰</button>
+      <div class="brand">NEXA <small>BETA EXPERIENCE</small></div>
+    </header>
+    <section class="content" id="pageContent">
+      <div class="hero">
+        <span class="eyebrow">WELCOME</span>
+        <h2>Welcome To Nexa <span style="color:var(--accent)">(Beta)</span></h2>
+        <p>به نسخه آزمایشی نکسا خوش آمدید. از منوی بالا سمت چپ برای رفتن به بخش‌های مختلف استفاده کنید.</p>
+      </div>
+    </section>
+    <footer class="footer">NEXA (BETA)</footer>
+  </main>
+
+  <div class="overlay" id="overlay"></div>
+  <nav class="drawer" id="drawer" aria-label="منوی اصلی">
+    <div class="drawer-head">
+      <strong>NEXA <span style="color:var(--accent)">BETA</span></strong>
+      <button class="close-btn" id="closeBtn" aria-label="بستن منو">×</button>
+    </div>
+    <button class="nav-item" data-page="home"><span>خانه</span><small>بازگشت به صفحه ورود</small></button>
+    <button class="nav-item" data-page="yare"><span>سایت یار مهربان نسخه 0.8</span><small>ورود به سایت یار مهربان</small></button>
+    <button class="nav-item" data-page="apps"><span>اپلیکیشن‌های ما</span><small>مشاهده برنامه‌های نکسا</small></button>
+  </nav>
+
+  <script>
+    const landing = document.getElementById('landing');
+    const dashboard = document.getElementById('dashboard');
+    const pageContent = document.getElementById('pageContent');
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    const menuBtn = document.getElementById('menuBtn');
+
+    function showScreen(screen) {
+      landing.classList.toggle('active', screen === 'landing');
+      dashboard.classList.toggle('active', screen === 'dashboard');
+    }
+    function openMenu() {
+      drawer.classList.add('open');
+      overlay.classList.add('show');
+      menuBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeMenu() {
+      drawer.classList.remove('open');
+      overlay.classList.remove('show');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+    function renderHome() {
+      pageContent.innerHTML = `
+        <div class="hero">
+          <span class="eyebrow">WELCOME</span>
+          <h2>Welcome To Nexa <span style="color:var(--accent)">(Beta)</span></h2>
+          <p>به نسخه آزمایشی نکسا خوش آمدید. از منوی بالا سمت چپ برای رفتن به بخش‌های مختلف استفاده کنید.</p>
+        </div>`;
+      showScreen('dashboard');
+    }
+    function renderApps() {
+      pageContent.innerHTML = `
+        <h2 class="section-title">اپلیکیشن‌های ما</h2>
+        <div class="apps-placeholder">
+          <div class="soon-icon">✦</div>
+          <h3>دیگر موارد به زودی</h3>
+          <p>اپلیکیشن‌های جدید نکسا به‌زودی در این بخش قرار می‌گیرند.</p>
+        </div>`;
+      showScreen('dashboard');
+    }
+
+    document.getElementById('guestBtn').addEventListener('click', () => {
+      renderHome();
+      window.scrollTo(0, 0);
+    });
+    menuBtn.addEventListener('click', openMenu);
+    document.getElementById('closeBtn').addEventListener('click', closeMenu);
+    overlay.addEventListener('click', closeMenu);
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        closeMenu();
+        if (page === 'home') {
+          showScreen('landing');
+          window.scrollTo(0, 0);
+        } else if (page === 'yare') {
+          window.location.href = 'https://123mdnablly-bot.github.io/Yare_mehraban/';
+        } else if (page === 'apps') {
+          renderApps();
+          window.scrollTo(0, 0);
+        }
+      });
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeMenu();
+    });
+  </script>
+</body>
+</html>
